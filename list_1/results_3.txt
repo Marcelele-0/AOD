@@ -1,0 +1,45 @@
+Running all tests for ex3...
+=== test_cases/3/g3-1.txt ===
+Graph type: D  Vertices: 16  Edges: 39
+SCC count: 5
+SCC sizes: 5 4 4 2 1 
+--- Components ---
+Component 1: 1 2 3 4 5 
+Component 2: 12 15 14 13 
+Component 3: 6 8 9 7 
+Component 4: 10 11 
+Component 5: 16 
+Elapsed: 4 ms
+
+=== test_cases/3/g3-2.txt ===
+Graph type: D  Vertices: 107  Edges: 185
+SCC count: 5
+SCC sizes: 6 40 36 24 1 
+--- Components ---
+Component 1: 1 2 3 4 5 6 
+Component 2: 67 106 105 104 103 102 101 100 99 98 97 96 95 94 93 92 91 90 89 88 87 86 85 84 83 82 81 80 79 78 77 76 75 74 73 72 71 70 69 68 
+Component 3: 7 13 14 8 20 21 15 9 27 28 22 16 10 34 35 29 23 17 11 41 42 36 30 24 18 12 40 33 39 26 32 38 19 25 31 37 
+Component 4: 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 
+Component 5: 107 
+Elapsed: 11 ms
+
+=== test_cases/3/g3-3.txt ===
+Graph type: D  Vertices: 1008  Edges: 1609
+SCC count: 5
+SCC sizes: 7 400 400 200 1 
+Elapsed: 14 ms
+
+=== test_cases/3/g3-4.txt ===
+Graph type: D  Vertices: 10009  Edges: 15943
+SCC count: 5
+SCC sizes: 8 4000 3600 2400 1 
+Elapsed: 28 ms
+
+=== test_cases/3/g3-5.txt ===
+Graph type: D  Vertices: 100010  Edges: 159679
+Elapsed: 172 ms
+
+=== test_cases/3/g3-6.txt ===
+Graph type: D  Vertices: 1000011  Edges: 1598897
+Elapsed: 770 ms
+

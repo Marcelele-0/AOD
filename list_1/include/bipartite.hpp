@@ -1,6 +1,6 @@
 #pragma once
 #include "graph.hpp"
-#include "algorithm_results.hpp"
+#include "results.hpp"
 #include <vector>
 #include <queue>
 

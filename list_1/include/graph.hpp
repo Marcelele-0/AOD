@@ -38,4 +38,18 @@ public:
             }
         }
     }
+
+    /**
+     * @brief Construct an empty graph with given sizes (no stdin read).
+     * @param n number of vertices
+     * @param m number of edges (optional/info)
+     * @param is_directed whether the graph is directed
+     */
+    Graph(int n, int m, bool is_directed) {
+        num_vertices = n;
+        num_edges = m;
+        directed = is_directed;
+        adj_list.clear();
+        adj_list.resize(num_vertices + 1);
+    }
 };
