@@ -1,62 +1,44 @@
 #include <iostream>
-#include <vector>
-#include "graph.h"
-#include "bipartite.h"
-#include "algorithm_results.h"
+#include "graph.hpp"
+#include "scc.hpp"
+#include "scc_result.hpp"
 
 int main() {
     // 1. Load the graph
     Graph g;
 
-    // 2. Create the algorithm object and run it
-    BipartiteCheck checker(g);
-    BipartiteResult res = checker.run();
+    // 2. Check if the graph is directed
+    if (!g.directed) {
+        std::cerr << "Error: SCC algorithm is for directed graphs." << std::endl;
+        return 1; // Exit with an error
+    }
 
-    // 3. Print the main result (yes/no)
-    if (res.is_bipartite) {
-        std::cout << "Graf jest dwudzielny." << std::endl;
-        
-        // 4. Print partitions (if n <= 200)
-        if (g.num_vertices <= 200) {
-            std::vector<int> V0, V1;
-            for (int i = 1; i <= g.num_vertices; ++i) {
-                if (res.partition[i] == 0) {
-                    V0.push_back(i);
-                } else if (res.partition[i] == 1) {
-                    V1.push_back(i);
-                }
-                // Note: if a component has only 1 node, it might stay -1
-                // depending on implementation, but for bipartite check
-                // we can assign it to V0. Let's adjust logic:
-            }
-            
-            // Re-check for unassigned (single-node components)
-            for (int i = 1; i <= g.num_vertices; ++i) {
-                 if (res.partition[i] == -1) {
-                    V0.push_back(i);
-                 }
-            }
+    // 3. Create the algorithm object and run it
+    SCC scc_finder(g);
+    SCCResult res = scc_finder.run();
 
+    // 4. Print results according to the task specification
+    std::cout << "Number of strongly connected components: " 
+              << res.components.size() << std::endl;
 
-            std::cout << "Podzial V0: ";
-            for (int node : V0) {
-                std::cout << node << " ";
-            }
-            std::cout << std::endl;
+    std::cout << "Number of vertices in components: ";
+    for (const auto& comp : res.components) {
+        std::cout << comp.size() << " ";
+    }
+    std::cout << std::endl;
 
-            std::cout << "Podzial V1: ";
-            for (int node : V1) {
+    // Condition: print component contents only for n <= 200
+    if (g.num_vertices <= 200) {
+        std::cout << "--- Components ---" << std::endl;
+        int component_index = 1;
+        for (const auto& comp : res.components) {
+            std::cout << "Component " << component_index++ << ": ";
+            for (int node : comp) {
                 std::cout << node << " ";
             }
             std::cout << std::endl;
         }
-
-    } else {
-        std::cout << "Graf NIE jest dwudzielny." << std::endl;
     }
-
-    // 5. Answer the complexity question
-    std::cout << "\nZlozonosc algorytmu: O(|V| + |E|)" << std::endl;
 
     return 0;
 }
