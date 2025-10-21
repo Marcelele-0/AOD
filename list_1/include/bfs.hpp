@@ -1,6 +1,6 @@
 #pragma once
-#include "graph.h"
-#include "traversal_result.h"
+#include "graph.hpp"
+#include "results.hpp"
 #include <vector>
 #include <queue> // BFS uses a Queue
 

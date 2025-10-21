@@ -1,6 +1,6 @@
 #pragma once
-#include "graph.h"
-#include "results.h"
+#include "graph.hpp"
+#include "results.hpp"
 #include <vector>
 
 class DFS {

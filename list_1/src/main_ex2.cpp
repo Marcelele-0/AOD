@@ -1,7 +1,7 @@
 #include <iostream>
-#include "graph.h"
-#include "toposort.h"
-#include "toposort_result.h"
+#include "graph.hpp"
+#include "toposort.hpp"
+#include "results.hpp"
 
 int main() {
     // 1. Read the graph (done by the constructor)

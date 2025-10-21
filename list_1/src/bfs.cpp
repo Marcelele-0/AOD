@@ -1,4 +1,4 @@
-#include "bfs.h"
+#include "bfs.hpp"
 
 // Constructor is identical to DFS
 BFS::BFS(const Graph& g) : graph(g) {

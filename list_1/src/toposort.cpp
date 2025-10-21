@@ -1,4 +1,4 @@
-#include "toposort.h"
+#include "toposort.hpp"
 
 // Constructor initializes the state vector
 TopoSort::TopoSort(const Graph& g) : graph(g) {

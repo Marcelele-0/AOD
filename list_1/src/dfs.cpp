@@ -1,4 +1,4 @@
-#include "dfs.h"
+#include "dfs.hpp"
 
 // Constructor initializes the state vectors based on graph size
 DFS::DFS(const Graph& g) : graph(g) {

@@ -1,6 +1,6 @@
 #pragma once
-#include "graph.h"
-#include "toposort_result.h"
+#include "graph.hpp"
+#include "results.hpp"
 #include <vector>
 
 class TopoSort {

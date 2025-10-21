@@ -1,9 +1,9 @@
 #include <iostream>
 #include <string>
 #include "graph.h"
-#include "dfs.h"
-#include "bfs.h"
-#include "results.h"
+#include "dfs.hpp"
+#include "bfs.hpp"
+#include "results.hpp"
 
 /**
  * @brief Helper function to print results in a clean format.
