@@ -3,7 +3,7 @@
 #include "graph.h"
 #include "dfs.h"
 #include "bfs.h"
-#include "traversal_result.h"
+#include "results.h"
 
 /**
  * @brief Helper function to print results in a clean format.

@@ -1,6 +1,6 @@
 #pragma once
 #include "graph.h"
-#include "traversal_result.h"
+#include "results.h"
 #include <vector>
 
 class DFS {
