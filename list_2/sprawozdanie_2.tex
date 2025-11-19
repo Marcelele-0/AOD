@@ -1,0 +1,524 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%   SZABLON SPRAWOZDANIA - AOD (JĘZYK JULIA / JUMP)
+%   Autor: Marcel Musiałek, 279704
+%
+%   Na podstawie szablonu z Obliczeń Naukowych
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% --- Klasa dokumentu i podstawowe ustawienia ---
+\documentclass[11pt, a4paper]{article}
+
+% --- Podstawowe pakiety kodowania i języka ---
+\usepackage[utf8]{inputenc} % Kodowanie wejściowe
+\usepackage[T1]{fontenc}    % Kodowanie fontów (obsługa polskich znaków)
+\usepackage{lmodern}      % Nowoczesna czcionka Latin Modern
+\usepackage[polish]{babel}  % Ustawia polskie nazwy (np. "Spis treści", "Rysunek")
+
+% --- Pakiety matematyczne ---
+\usepackage{amsmath} % Zaawansowane formuły matematyczne
+\usepackage{amssymb} % Dodatkowe symbole, np. \forall
+
+% --- Ustawienia strony i układu ---
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm} % Marginesy
+\usepackage{verbatim}  % Dla środowiska \begin{verbatim} (surowy tekst)
+\usepackage{enumitem}  % Lepsza kontrola nad listami
+
+% --- Pakiet Hyperref (dla linków i zakładek PDF) ---
+\usepackage[unicode=true, pdfusetitle]{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Sprawozdanie AOD},
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%   STRONA TYTUŁOWA DOKUMENTU
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Algorytmy Optymalizacji Dyskretnej \\ Laboratorium 2: Programowanie Liniowe}
+\author{Marcel Musiałek \\ 279704}
+\date{\today}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%   GŁÓWNY DOKUMENT
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+% Wygeneruj stronę tytułową
+\maketitle
+
+% Spis treści
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%   TREŚĆ SPRAWOZDANIA
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% --- POCZĄTEK ZADANIA 1 ---
+\section{Zadanie 1: Problem dostaw paliwa}
+
+\subsection{Opis Modelu}
+Zmienne i parametry modelu:
+
+\begin{itemize}
+    \item $n$ - ilość lotnisk ($n=4$)
+    \item $m$ - ilość dostawców paliwa ($m=3$)
+    \item $I = \{1, \dots, n\}$ - zbiór lotnisk
+    \item $J = \{1, \dots, m\}$ - zbiór dostawców
+    \item $d \in \mathbb{R}^n$ - wektor popytu (demand), zapotrzebowanie na paliwo na $i$-tym lotnisku.
+    \item $s \in \mathbb{R}^m$ - wektor podaży (supply), maksymalna ilość paliwa od $j$-tego dostawcy.
+    \item $C = (c_{ij}) \in \mathbb{R}^{n \times m}$ - macierz kosztów, cena [\$ / galon] dostarczenia paliwa na $i$-te lotnisko przez $j$-tego dostawcę.
+\end{itemize}
+
+\noindent \textbf{Zmienne decyzyjne:}
+$$ X = (x_{ij}) \in \mathbb{R}^{n \times m} $$
+gdzie $x_{ij}$ to ilość paliwa [w galonach] dostarczona przez $j$-tego dostawcę na $i$-te lotnisko.
+
+\noindent \textbf{Cel - minimalizacja kosztów:}
+$$ \min \sum_{i=1}^{n} \sum_{j=1}^{m} c_{ij} \cdot x_{ij} $$
+
+\noindent \textbf{Ograniczenia:}
+\begin{align*}
+    x_{ij} &\ge 0 & \forall i \in I, \forall j \in J \quad &\text{(Nieujemność dostaw)} \\
+    \sum_{j=1}^{m} x_{ij} &= d_i & \forall i \in I \quad &\text{(Zaspokojenie popytu)} \\
+    \sum_{i=1}^{n} x_{ij} &\le s_j & \forall j \in J \quad &\text{(Limit podaży)}
+\end{align*}
+
+\subsection{Egzemplarz z listy}
+$n = 4$, $m = 3$
+$$ d =
+\begin{pmatrix}
+110000 \\
+220000 \\
+330000 \\
+440000
+\end{pmatrix}, \quad s =
+\begin{pmatrix}
+275000 \\
+550000 \\
+660000
+\end{pmatrix}, \quad C =
+\begin{pmatrix}
+10 & 7 & 8 \\
+10 & 11 & 14 \\
+9 & 12 & 4 \\
+11 & 13 & 9
+\end{pmatrix}
+$$
+\bigskip
+\noindent \textbf{Rozwiązanie (za pomocą GLPK):}
+Optymalna macierz dostaw $X$ (wiersze = lotniska, kolumny = firmy):
+$$ X =
+\begin{pmatrix}
+0 & 110000 & 0 \\
+165000 & 55000 & 0 \\
+0 & 0 & 330000 \\
+110000 & 0 & 330000
+\end{pmatrix}
+$$
+
+\noindent \textbf{Interpretacja wyników:}
+\begin{itemize}
+    \item[ (a)] \textbf{Minimalny łączny koszt} dostaw wynosi \textbf{8 525 000 \$}.
+    \item[ (b)] \textbf{Wszystkie firmy dostarczają paliwo} (każda kolumna macierzy $X$ zawiera co najmniej jedną niezerową wartość).
+    \item[ (c)] \textbf{Możliwości Firmy 1 i Firmy 3 są wyczerpane} (sumy kolumn 1 i 3 są równe $s_1$ i $s_3$). Firma 2 dostarcza łącznie 165 000 galonów, wykorzystując 30\% swoich możliwości (165 000 / 550 000).
+\end{itemize}
+
+% --- KONIEC ZADANIA 1 ---
+
+% --- POCZĄTEK ZADANIA 2 ---
+\section{Zadanie 2: Optymalny plan produkcji}
+
+\subsection{Opis Modelu}
+Problem polega na maksymalizacji tygodniowego zysku z produkcji czterech wyrobów, przy ograniczeniach czasowych trzech maszyn oraz ograniczeniach popytu.
+
+\begin{itemize}
+    \item $W = \{P1, P2, P3, P4\}$ - zbiór wyrobów ($i \in W$)
+    \item $M = \{M1, M2, M3\}$ - zbiór maszyn ($j \in M$)
+    \item $t_{ij}$ - czas obróbki [min/kg] wyrobu $i$ na maszynie $j$
+    \item $d_i$ - maksymalny tygodniowy popyt [kg] na wyrób $i$
+    \item $a_j$ - dostępny czas pracy [min] maszyny $j$ (3600 min dla każdej)
+    \item $z_i$ - zysk jednostkowy [\$/kg] dla wyrobu $i$. Jest to wartość obliczona jako:
+    \[ z_i = (\text{Cena}_i) - (\text{KosztMat}_i) - \sum_{j \in M} (t_{ij} \cdot \text{KosztPracyMin}_j) \]
+\end{itemize}
+
+\noindent \textbf{Zmienne decyzyjne:}
+$$ x_i \quad \text{dla } i \in W $$
+gdzie $x_i$ to tygodniowa produkcja [w kg] wyrobu $i$.
+
+\noindent \textbf{Cel - maksymalizacja zysku:}
+$$ \max \sum_{i \in W} z_i \cdot x_i $$
+
+\noindent \textbf{Ograniczenia:}
+\begin{align*}
+    \sum_{i \in W} t_{ij} \cdot x_i &\le a_j & \forall j \in M \quad &\text{(Limit czasu maszyn)} \\
+    0 \le x_i &\le d_i & \forall i \in W \quad &\text{(Limit popytu i nieujemność)}
+\end{align*}
+
+\subsection{Egzemplarz z listy}
+Dane wejściowe (z tabel i treści zadania):
+$$ t =
+\begin{pmatrix}
+5 & 10 & 6 \\
+3 & 6 & 4 \\
+4 & 5 & 3 \\
+4 & 2 & 1
+\end{pmatrix} 
+\quad d =
+\begin{pmatrix}
+400 \\ 100 \\ 150 \\ 500
+\end{pmatrix} 
+\quad a =
+\begin{pmatrix}
+3600 \\ 3600 \\ 3600
+\end{pmatrix} 
+$$
+Obliczony wektor zysku jednostkowego (po odjęciu kosztów materiałowych i kosztów pracy maszyn):
+$$ z =
+\begin{pmatrix}
+4.200 \\ 5.500 \\ 4.550 \\ 3.750
+\end{pmatrix}
+$$
+
+\bigskip
+\noindent \textbf{Rozwiązanie (za pomocą GLPK):}
+Optymalny wektor produkcji $x$:
+$$ x =
+\begin{pmatrix}
+125.00 \\
+100.00 \\
+150.00 \\
+500.00
+\end{pmatrix}
+$$
+
+\noindent \textbf{Interpretacja wyników:}
+\begin{itemize}
+    \item Optymalny tygodniowy plan produkcji zakłada produkcję 125 kg P1, 100 kg P2, 150 kg P3 oraz 500 kg P4.
+    \item Produkcja wyrobów P2, P3 i P4 jest \textbf{ograniczona popytem} (osiągnęła 100\% maksymalnej sprzedaży). Produkcja P1 jest ograniczona przez zasoby.
+    \item Maszyna M2 pracuje z pełną wydajnością (100\%), M1 jest bliska limitu (97.92\%), a M3 ma duży zapas mocy (58.33\%). Oznacza to, że \textbf{maszyna M2 jest "wąskim gardłem"} procesu.
+    \item Osiągnięty \textbf{maksymalny zysk tygodniowy} wynosi \textbf{3632.50 \$}.
+\end{itemize}
+
+% --- KONIEC ZADANIA 2 ---
+
+% --- POCZĄTEK ZADANIA 3 ---
+\section{Zadanie 3: Planowanie produkcji i magazynowania}
+
+\subsection{Opis Modelu}
+Problem wielookresowego planowania produkcji z możliwością magazynowania i produkcją ponadwymiarową.
+
+\begin{itemize}
+    \item $K$ - liczba okresów ($K=4$)
+    \item $J = \{1, \dots, K\}$ - zbiór okresów
+    \item $d_j$ - popyt na towar w okresie $j \in J$
+    \item $c_j$ - koszt jednostkowy produkcji normalnej w okresie $j \in J$
+    \item $o_j$ - koszt jednostkowy produkcji ponadwymiarowej w okresie $j \in J$
+    \item $a_j$ - limit produkcji ponadwymiarowej w okresie $j \in J$
+    \item $h$ - koszt jednostkowy magazynowania (stały = 1500)
+    \item $P_{\max}$ - limit produkcji normalnej (stały = 100)
+    \item $M_{\max}$ - limit pojemności magazynu (stały = 70)
+    \item $m_0$ - stan magazynu na początku (stały = 15)
+\end{itemize}
+
+\noindent \textbf{Zmienne decyzyjne:}
+\begin{itemize}
+    \item $p_j$ - ilość produkcji normalnej w okresie $j \in J$
+    \item $e_j$ - ilość produkcji ponadwymiarowej w okresie $j \in J$
+    \item $m_j$ - stan magazynu na koniec okresu $j \in J \cup \{0\}$
+\end{itemize}
+
+\noindent \textbf{Cel - minimalizacja kosztów:}
+$$ \min \left( \sum_{j=1}^{K} (c_j \cdot p_j + o_j \cdot e_j) + \sum_{j=1}^{K} (h \cdot m_j) \right) $$
+
+\noindent \textbf{Ograniczenia:}
+\begin{align*}
+    m_j &= m_{j-1} + p_j + e_j - d_j & \forall j \in J \quad &\text{(Bilans magazynu)} \\
+    p_j &\le P_{\max} & \forall j \in J \quad &\text{(Limit prod. normalnej)} \\
+    e_j &\le a_j & \forall j \in J \quad &\text{(Limit prod. ponadwymiarowej)} \\
+    m_j &\le M_{\max} & \forall j \in J \quad &\text{(Limit magazynu)} \\
+    m_0 &= 15 & \quad &\text{(Warunek początkowy)} \\
+    p_j, e_j, m_j &\ge 0 & \forall j \in J &
+\end{align*}
+
+\subsection{Egzemplarz z listy}
+Dane wejściowe (z tabeli):
+$$ d = \begin{pmatrix} 130 \\ 80 \\ 125 \\ 195 \end{pmatrix} \quad
+   c = \begin{pmatrix} 6000 \\ 4000 \\ 8000 \\ 9000 \end{pmatrix} \quad
+   o = \begin{pmatrix} 8000 \\ 6000 \\ 10000 \\ 11000 \end{pmatrix} \quad
+   a = \begin{pmatrix} 60 \\ 65 \\ 70 \\ 60 \end{pmatrix}
+$$
+Oraz $K=4, P_{\max}=100, M_{\max}=70, h=1500, m_0=15$.
+
+\bigskip
+\noindent \textbf{Rozwiązanie (za pomocą GLPK):}
+
+Wektory zmiennych decyzyjnych w rozwiązaniu optymalnym:
+$$ p = \begin{pmatrix} 100 \\ 100 \\ 100 \\ 100 \end{pmatrix} \quad
+   e = \begin{pmatrix} 15 \\ 50 \\ 0 \\ 50 \end{pmatrix} \quad
+   m = \begin{pmatrix} 0 \\ 70 \\ 45 \\ 0 \end{pmatrix}
+$$
+(Wektor $m$ pokazuje stan na koniec okresów 1, 2, 3, 4; stan $m_0=15$).
+
+\noindent \textbf{Interpretacja wyników:}
+\begin{itemize}
+    \item[ (a)] \textbf{Minimalny łączny koszt} produkcji i magazynowania wynosi \textbf{3 842 500 \$}.
+    \item[ (b)] Firma musi zaplanować \textbf{produkcję ponadwymiarową w okresach 1, 2 oraz 4} (wektor $e$ ma tam wartości 15, 50, 50). W okresie 3 produkcja ponadwymiarowa nie jest opłacalna.
+    \item[ (c)] Możliwości magazynowania (70 jednostek) są \textbf{wyczerpane na koniec okresu 2} (gdzie $m_2 = 70$). Firma celowo produkuje "na zapas" w tanim okresie 2 (koszt prod. norm 4000, ponadwym. 6000), płaci za magazynowanie (1500), aby uniknąć znacznie droższej produkcji w okresie 3 (koszt norm 8000, ponadwym. 10000).
+\end{itemize}
+
+% --- KONIEC ZADANIA 3 ---
+
+% --- POCZĄTEK ZADANIA 4 ---
+\section{Zadanie 4: Najkrótsza ścieżka z ograniczeniem}
+
+\subsection{Opis Modelu}
+Problem znajdowania najkrótszej ścieżki z ograniczeniem zasobu (RCSP). Jest to problem NP-trudny, ale dla małych instancji można go efektywnie rozwiązać za pomocą programowania całkowitoliczbowego (MIP). Model bazuje na sformułowaniu przepływowym.
+
+\begin{itemize}
+    \item $N$ - zbiór wierzchołków (miast)
+    \item $A \subseteq N \times N$ - zbiór łuków (połączeń), $(i, j) \in A$
+    \item $c_{ij}$ - koszt przejazdu łukiem $(i, j)$
+    \item $t_{ij}$ - czas przejazdu łukiem $(i, j)$
+    \item $i_0 \in N$ - wierzchołek startowy
+    \item $j_0 \in N$ - wierzchołek końcowy
+    \item $T$ - maksymalny dopuszczalny czas przejazdu
+\end{itemize}
+
+\noindent \textbf{Zmienne decyzyjne:}
+$$ x_{ij} \in \{0, 1\} \quad \forall (i, j) \in A $$
+gdzie $x_{ij} = 1$, jeśli łuk $(i, j)$ należy do wybranej ścieżki, i $x_{ij} = 0$ w przeciwnym razie.
+
+\noindent \textbf{Cel - minimalizacja kosztu:}
+$$ \min \sum_{(i, j) \in A} c_{ij} \cdot x_{ij} $$
+
+\noindent \textbf{Ograniczenia:}
+\begin{align*}
+    \sum_{(i, j) \in A} t_{ij} \cdot x_{ij} &\le T & &\text{(Limit czasu)} \\
+    \sum_{(i, k) \in A} x_{ik} - \sum_{(k, i) \in A} x_{ki} &= b_k & \forall k \in N \quad &\text{(Bilans przepływu)}
+\end{align*}
+gdzie wektor bilansu $b_k$ jest zdefiniowany jako:
+$$ b_k = \begin{cases} 
+      1 & \text{dla } k = i_0 \text{ (start)} \\
+      -1 & \text{dla } k = j_0 \text{ (koniec)} \\
+      0 & \text{dla pozostałych } k \in N
+   \end{cases}
+$$
+
+\subsection{Rozwiązanie (a) - Egzemplarz z listy}
+Dane: $N = \{1, \dots, 10\}$, $i_0 = 1$, $j_0 = 10$, $T = 15$. Koszty i czasy zgodnie z listą.
+
+\noindent \textbf{Rozwiązanie (za pomocą GLPK):}
+\begin{itemize}
+    \item \textbf{Minimalny koszt:} 13 \$
+    \item \textbf{Całkowity czas:} 15 (wykorzystano 100\% limitu $T=15$)
+    \item \textbf{Optymalna ścieżka:} 1 $\to$ 2 $\to$ 3 $\to$ 5 $\to$ 7 $\to$ 9 $\to$ 10
+\end{itemize}
+
+\subsection{Rozwiązanie (b) - Własny egzemplarz}
+Stworzono egzemplarz ($n=10, T=15$) z dwiema głównymi ścieżkami:
+\begin{itemize}
+    \item Ścieżka 1 (2 krawędzie: 1$\to$5$\to$10): Koszt = 2, Czas = 20
+    \item Ścieżka 2 (3 krawędzie: 1$\to$2$\to$6$\to$10): Koszt = 6, Czas = 12
+\end{itemize}
+Najtańsza ścieżka (Koszt 2) jest celowo za długa (20 > 15).
+
+\noindent \textbf{Rozwiązanie (za pomocą GLPK):}
+\begin{itemize}
+    \item \textbf{Minimalny koszt:} 6 \$
+    \item \textbf{Całkowity czas:} 12 (mieści się w limicie $T=15$)
+    \item \textbf{Optymalna ścieżka:} 1 $\to$ 2 $\to$ 6 $\to$ 10
+\end{itemize}
+Model poprawnie odrzucił najtańszą ścieżkę (2-krawędziową) z powodu limitu czasu i znalazł kolejną najlepszą (3-krawędziową), spełniając założenia podpunktu (b).
+
+\subsection{Odpowiedzi na pytania (c) i (d)}
+
+\noindent \textbf{(c) Czy ograniczenie na całkowitoliczbowość jest potrzebne?}
+
+\textbf{Tak, jest absolutnie konieczne.} Model programowania liniowego (LP) bez tego ograniczenia (tj. $x_{ij} \in [0, 1]$) mógłby znaleźć rozwiązanie ułamkowe. Solver LP mógłby "podzielić" przepływ $b_k=1$ na dwie lub więcej ścieżek jednocześnie, aby uśrednić koszty i czasy, co nie reprezentuje fizycznego przejazdu.
+
+\textbf{Kontrprzykład:} Załóżmy, że mamy dwie ścieżki ze startu (1) do celu (2):
+\begin{itemize}
+    \item Ścieżka A (1$\to$2): Koszt = 10, Czas = 10
+    \item Ścieżka B (1$\to$2): Koszt = 0, Czas = 20
+    \item Limit czasu $T = 15$.
+\end{itemize}
+Model MIP poprawnie wybrałby ścieżkę A (Koszt 10). Natomiast model LP (bez całkowitoliczbowości) mógłby ustawić $x_A = 0.5$ i $x_B = 0.5$. Dałoby to "uśredniony" wynik: Całkowity Koszt = $0.5 \cdot 10 + 0.5 \cdot 0 = 5$ oraz Całkowity Czas = $0.5 \cdot 10 + 0.5 \cdot 20 = 15$. Takie rozwiązanie (koszt 5) jest lepsze od rozwiązania całkowitoliczbowego (koszt 10), ale jest bezużyteczne, bo nie reprezentuje żadnej realnej ścieżki.
+
+\noindent \textbf{(d) Czy po usunięciu limitu czasu (w modelu LP) wynik jest akceptowalny?}
+
+\textbf{Tak.} Jeżeli usuniemy ograniczenie na czas (w modelu LP, czyli $x_{ij} \in [0, 1]$) i rozwiążemy problem $\min \sum c_{ij} x_{ij}$ z samymi ograniczeniami bilansu przepływu, otrzymamy klasyczny problem najkrótszej ścieżki (LP). Macierz opisująca ograniczenia bilansu przepływu jest **całkowicie unimodularna**. Oznacza to, że dla dowolnych całkowitoliczbowych danych wejściowych (wektor $b_k$), rozwiązanie optymalne problemu LP (jeśli istnieje) będzie **zawsze całkowitoliczbowe** (tj. $x_{ij}$ będą wynosić 0 lub 1).
+
+W skrócie: dla problemu najkrótszej ścieżki (bez dodatkowych ograniczeń jak czas), nie musimy wymuszać całkowitoliczbowości, ponieważ dostajemy ją "za darmo" z własności matematycznych problemu.
+
+% --- KONIEC ZADANIA 4 ---
+
+% --- POCZĄTEK ZADANIA 5 ---
+\section{Zadanie 5: Przydział radiowozów (Problem cyrkulacji)}
+
+\subsection{Opis Modelu}
+Problem polega na ustaleniu liczby radiowozów w poszczególnych dzielnicach na poszczególnych zmianach tak, aby spełnić ograniczenia minimalne i maksymalne oraz zminimalizować łączną flotę pojazdów. Zadanie sformułowano jako problem programowania całkowitoliczbowego.
+
+\begin{itemize}
+    \item $I = \{p1, p2, p3\}$ - zbiór dzielnic
+    \item $J = \{1, 2, 3\}$ - zbiór zmian
+    \item $L_{ij}, U_{ij}$ - minimalna i maksymalna liczba radiowozów w dzielnicy $i$ na zmianie $j$ (z tabel 1 i 2)
+    \item $S_j$ - wymagana minimalna liczba radiowozów łącznie na zmianie $j$ ($[10, 20, 18]$)
+    \item $D_i$ - wymagana minimalna liczba radiowozów łącznie w dzielnicy $i$ ($[10, 14, 13]$)
+\end{itemize}
+
+\noindent \textbf{Zmienne decyzyjne:}
+$$ x_{ij} \in \mathbb{Z}_{\ge 0} $$
+Liczba radiowozów przydzielonych do dzielnicy $i$ na zmianie $j$.
+
+\noindent \textbf{Cel - minimalizacja floty:}
+$$ \min \sum_{i \in I} \sum_{j \in J} x_{ij} $$
+
+\noindent \textbf{Ograniczenia:}
+\begin{align*}
+    L_{ij} \le x_{ij} &\le U_{ij} & \forall i \in I, j \in J \quad &\text{(Limity lokalne)} \\
+    \sum_{i \in I} x_{ij} &\ge S_j & \forall j \in J \quad &\text{(Minima dla zmian)} \\
+    \sum_{j \in J} x_{ij} &\ge D_i & \forall i \in I \quad &\text{(Minima dla dzielnic)}
+\end{align*}
+
+\subsection{Wyniki i interpretacja}
+Dla podanych danych solver GLPK znalazł rozwiązanie optymalne.
+
+\noindent \textbf{Optymalny przydział radiowozów (macierz $X$):}
+$$
+\begin{array}{r|ccc|c}
+ & \text{Zmiana 1} & \text{Zmiana 2} & \text{Zmiana 3} & \text{Suma Dzielnicy} \\
+\hline
+p1 & 2 & 7 & 5 & 14 \\
+p2 & 3 & 6 & 7 & 16 \\
+p3 & 5 & 7 & 6 & 18 \\
+\hline
+\text{Suma Zmiany} & 10 & 20 & 18 & \textbf{48 (Całkowita)}
+\end{array}
+$$
+
+\noindent \textbf{Interpretacja:}
+Minimalna łączna liczba radiowozów potrzebna do spełnienia wszystkich wymogów wynosi **48**.
+\begin{itemize}
+    \item Wymogi dla zmian zostały spełnione dokładnie na poziomie minimów (10, 20, 18).
+    \item Wszystkie dzielnice otrzymały liczbę pojazdów przekraczającą wymagane minima ($14 > 10$, $16 > 14$, $18 > 13$). Wynika to z "sztywnych" ograniczeń w poszczególnych komórkach tabeli (np. w p1 na Zmianie 2 musimy dać aż 7 aut, co podbija sumę).
+\end{itemize}
+
+% --- KONIEC ZADANIA 5 ---
+
+% --- POCZĄTEK ZADANIA 6 ---
+\section{Zadanie 6: Rozmieszczenie kamer (Set Cover)}
+
+\subsection{Opis Modelu}
+Problem optymalnego rozmieszczenia kamer monitoringu jest wariantem problemu pokrycia zbioru (Set Cover Problem). Celem jest minimalizacja liczby kamer potrzebnych do monitorowania wszystkich kontenerów.
+
+\begin{itemize}
+    \item $R = \{1, \dots, m\}$ - zbiór wierszy
+    \item $C = \{1, \dots, n\}$ - zbiór kolumn
+    \item $Q \subset R \times C$ - zbiór współrzędnych, w których znajdują się kontenery
+    \item $k$ - zasięg widzenia kamery (liczba kratek w cztery strony świata)
+\end{itemize}
+
+\noindent \textbf{Zmienne decyzyjne:}
+$$ x_{ij} \in \{0, 1\} \quad \forall i \in R, j \in C $$
+gdzie $x_{ij} = 1$, jeśli w kwadracie $(i, j)$ umieszczono kamerę.
+
+\noindent \textbf{Cel - minimalizacja liczby kamer:}
+$$ \min \sum_{i=1}^{m} \sum_{j=1}^{n} x_{ij} $$
+
+\noindent \textbf{Ograniczenia:}
+\begin{enumerate}
+    \item \textbf{Zakaz umieszczania na kontenerach:} Kamera nie może stać w miejscu zajętym przez kontener.
+    $$ x_{ij} = 0 \quad \forall (i, j) \in Q $$
+    
+    \item \textbf{Pokrycie monitoringu:} Każdy kontener musi być obserwowany przez co najmniej jedną kamerę. Niech $V_{(r,c)}$ oznacza zbiór pól, z których kamera o zasięgu $k$ widzi pole $(r,c)$.
+    $$ \sum_{(i, j) \in V_{(r,c)}} x_{ij} \ge 1 \quad \forall (r, c) \in Q $$
+    Zbiór $V_{(r,c)}$ definiujemy jako pola $(i,j)$ spełniające warunek:
+    $$ (i=r \land |j-c| \le k) \lor (j=c \land |i-r| \le k) $$
+\end{enumerate}
+
+\subsection{Wyniki eksperymentu}
+Wygenerowano instancję problemu o wymiarach $6 \times 6$ ($m=6, n=6$) z 6 losowo rozmieszczonymi kontenerami. Przetestowano dwa warianty parametru $k$. Poniżej przedstawiono bezpośredni wydruk z programu (mapy rozmieszczenia):
+
+\begin{verbatim}
+DANE: Teren 6x6, Liczba kontenerów: 6
+
+========================================
+   ROZWIĄZYWANIE DLA ZASIĘGU k = 1
+========================================
+Minimalna liczba kamer: 6
+
+Mapa rozmieszczenia (K=Kamera, C=Kontener, . = Pusto):
+   1 2 3 4 5 6 
+1: C . . . . . 
+2: K . . K C . 
+3: . K C . . . 
+4: . . . . K C 
+5: K C . . . . 
+6: . . K C . . 
+
+Lista pozycji kamer:
+ - (2, 1)
+ - (2, 4)
+ - (3, 2)
+ - (4, 5)
+ - (5, 1)
+ - (6, 3)
+
+========================================
+   ROZWIĄZYWANIE DLA ZASIĘGU k = 2
+========================================
+Minimalna liczba kamer: 3
+
+Mapa rozmieszczenia (K=Kamera, C=Kontener, . = Pusto):
+   1 2 3 4 5 6
+1: C . . . . .
+2: . . . . C .
+3: K . C . . .
+4: . . . . K C
+5: . C . . . .
+6: . K . C . .
+
+Lista pozycji kamer:
+ - (3, 1)
+ - (4, 5)
+ - (6, 2)
+\end{verbatim}
+
+\bigskip
+\noindent \textbf{Wariant 1: Zasięg $k=1$}
+\begin{itemize}
+    \item \textbf{Minimalna liczba kamer:} 6
+    \item \textbf{Interpretacja:} Przy małym zasięgu kamery muszą być ustawione bardzo blisko kontenerów (często w relacji 1:1), co wymusza użycie dużej liczby urządzeń.
+\end{itemize}
+
+\noindent \textbf{Wariant 2: Zasięg $k=2$}
+\begin{itemize}
+    \item \textbf{Minimalna liczba kamer:} 3
+    \item \textbf{Rozmieszczenie:} (3, 1), (4, 5), (6, 2).
+    \item \textbf{Interpretacja:} Zwiększenie zasięgu pozwoliło na drastyczną redukcję liczby kamer (o 50\%). Jedna kamera, dzięki dłuższemu zasięgowi w pionie i poziomie, jest w stanie monitorować wiele rozproszonych kontenerów jednocześnie (np. kamera w (3,1) widzi kontenery w (1,1) i (3,3)).
+\end{itemize}
+
+% --- KONIEC ZADANIA 6 ---
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%   KONIEC PLIKU
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
