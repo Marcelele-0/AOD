@@ -430,7 +430,7 @@ Problem optymalnego rozmieszczenia kamer monitoringu jest wariantem problemu pok
     \item $R = \{1, \dots, m\}$ - zbiór wierszy
     \item $C = \{1, \dots, n\}$ - zbiór kolumn
     \item $Q \subset R \times C$ - zbiór współrzędnych, w których znajdują się kontenery
-    \item $k$ - zasięg widzenia kamery (liczba kratek w cztery strony świata)
+    \item $k$ - zasięg widzenia kamery
 \end{itemize}
 
 \noindent \textbf{Zmienne decyzyjne:}
@@ -445,46 +445,48 @@ $$ \min \sum_{i=1}^{m} \sum_{j=1}^{n} x_{ij} $$
     \item \textbf{Zakaz umieszczania na kontenerach:} Kamera nie może stać w miejscu zajętym przez kontener.
     $$ x_{ij} = 0 \quad \forall (i, j) \in Q $$
     
-    \item \textbf{Pokrycie monitoringu:} Każdy kontener musi być obserwowany przez co najmniej jedną kamerę. Niech $V_{(r,c)}$ oznacza zbiór pól, z których kamera o zasięgu $k$ widzi pole $(r,c)$.
+    \item \textbf{Pokrycie monitoringu:} Każdy kontener musi być obserwowany przez co najmniej jedną kamerę.
     $$ \sum_{(i, j) \in V_{(r,c)}} x_{ij} \ge 1 \quad \forall (r, c) \in Q $$
-    Zbiór $V_{(r,c)}$ definiujemy jako pola $(i,j)$ spełniające warunek:
-    $$ (i=r \land |j-c| \le k) \lor (j=c \land |i-r| \le k) $$
 \end{enumerate}
 
-\subsection{Wyniki eksperymentu}
-Wygenerowano instancję problemu o wymiarach $6 \times 6$ ($m=6, n=6$) z 6 losowo rozmieszczonymi kontenerami. Przetestowano dwa warianty parametru $k$. Poniżej przedstawiono bezpośredni wydruk z programu (mapy rozmieszczenia):
+\noindent \textbf{Definicja zbioru widoczności $V_{(r,c)}$:}
+Zdefiniowano dwa warianty kształtu pola widzenia kamery:
 
+\textbf{A. Kształt "Plus" (+):} Kamera widzi tylko wzdłuż osi (zgodnie z podstawową treścią zadania).
+$$ V^{Plus}_{(r,c)} = \{ (i,j) : (i=r \land |j-c| \le k) \lor (j=c \land |i-r| \le k) \} $$
+
+\textbf{B. Kształt "Kwadrat" ($\blacksquare$):} Kamera widzi cały obszar $(2k+1) \times (2k+1)$ (rozszerzenie eksperymentalne).
+$$ V^{Kwadrat}_{(r,c)} = \{ (i,j) : |i-r| \le k \land |j-c| \le k \} $$
+
+\subsection{Wyniki eksperymentu}
+Wygenerowano instancję problemu o wymiarach $6 \times 6$ z 6 losowo rozmieszczonymi kontenerami. Przetestowano cztery scenariusze (kombinacje kształtu i zasięgu). Poniżej przedstawiono bezpośredni wydruk z programu:
+
+\bigskip
+% Używamy minipage, żeby całość wydruku była na jednej stronie (nierozrywalna)
+\noindent
+\begin{minipage}{\linewidth}
 \begin{verbatim}
 DANE: Teren 6x6, Liczba kontenerów: 6
 
-========================================
-   ROZWIĄZYWANIE DLA ZASIĘGU k = 1
-========================================
+==================================================
+   ROZWIĄZYWANIE: KSZTAŁT = PLUS, ZASIĘG k = 1
+==================================================
 Minimalna liczba kamer: 6
-
-Mapa rozmieszczenia (K=Kamera, C=Kontener, . = Pusto):
-   1 2 3 4 5 6 
+Mapa (PLUS, k=1):
+   1 2 3 4 5 6
 1: C . . . . . 
-2: K . . K C . 
-3: . K C . . . 
-4: . . . . K C 
-5: K C . . . . 
-6: . . K C . . 
+2: K . . K C .
+3: . K C . . .
+4: . . . . K C
+5: K C . . . .
+6: . . K C . .
+Lista kamer: (2, 1), (2, 4), (3, 2), (4, 5), (5, 1), (6, 3)
 
-Lista pozycji kamer:
- - (2, 1)
- - (2, 4)
- - (3, 2)
- - (4, 5)
- - (5, 1)
- - (6, 3)
-
-========================================
-   ROZWIĄZYWANIE DLA ZASIĘGU k = 2
-========================================
+==================================================
+   ROZWIĄZYWANIE: KSZTAŁT = PLUS, ZASIĘG k = 2
+==================================================
 Minimalna liczba kamer: 3
-
-Mapa rozmieszczenia (K=Kamera, C=Kontener, . = Pusto):
+Mapa (PLUS, k=2):
    1 2 3 4 5 6
 1: C . . . . .
 2: . . . . C .
@@ -492,25 +494,45 @@ Mapa rozmieszczenia (K=Kamera, C=Kontener, . = Pusto):
 4: . . . . K C
 5: . C . . . .
 6: . K . C . .
+Lista kamer: (3, 1), (4, 5), (6, 2)
 
-Lista pozycji kamer:
- - (3, 1)
- - (4, 5)
- - (6, 2)
+==================================================
+   ROZWIĄZYWANIE: KSZTAŁT = KWADRAT, ZASIĘG k = 1
+==================================================
+Minimalna liczba kamer: 3
+Mapa (KWADRAT, k=1):
+   1 2 3 4 5 6
+1: C . . . . .
+2: . K . . C .
+3: . . C . K .
+4: . . . . . C
+5: . C K . . .
+6: . . . C . .
+Lista kamer: (2, 2), (3, 5), (5, 3)
+
+==================================================
+   ROZWIĄZYWANIE: KSZTAŁT = KWADRAT, ZASIĘG k = 2
+==================================================
+Minimalna liczba kamer: 2
+Mapa (KWADRAT, k=2):
+   1 2 3 4 5 6
+1: C . . . . .
+2: K . . . C .
+3: . . C . . .
+4: . . . K . C
+5: . C . . . .
+6: . . . C . .
+Lista kamer: (2, 1), (4, 4)
 \end{verbatim}
+\end{minipage}
 
-\bigskip
-\noindent \textbf{Wariant 1: Zasięg $k=1$}
+\subsection{Analiza wyników}
 \begin{itemize}
-    \item \textbf{Minimalna liczba kamer:} 6
-    \item \textbf{Interpretacja:} Przy małym zasięgu kamery muszą być ustawione bardzo blisko kontenerów (często w relacji 1:1), co wymusza użycie dużej liczby urządzeń.
-\end{itemize}
-
-\noindent \textbf{Wariant 2: Zasięg $k=2$}
-\begin{itemize}
-    \item \textbf{Minimalna liczba kamer:} 3
-    \item \textbf{Rozmieszczenie:} (3, 1), (4, 5), (6, 2).
-    \item \textbf{Interpretacja:} Zwiększenie zasięgu pozwoliło na drastyczną redukcję liczby kamer (o 50\%). Jedna kamera, dzięki dłuższemu zasięgowi w pionie i poziomie, jest w stanie monitorować wiele rozproszonych kontenerów jednocześnie (np. kamera w (3,1) widzi kontenery w (1,1) i (3,3)).
+    \item \textbf{Wpływ kształtu:} Zmiana pola widzenia z "Plusa" na "Kwadrat" drastycznie zwiększa efektywność monitoringu. Dla zasięgu $k=1$, "Kwadrat" pozwolił zredukować liczbę kamer o połowę (z 6 do 3). Wynika to z faktu, że w metryce kwadratowej kamera pokrywa $(2k+1)^2$ pól, podczas gdy w "Plusie" tylko $4k+1$ pól.
+    
+    \item \textbf{Wpływ zasięgu ($k$):} Zwiększenie zasięgu z 1 do 2 również pozwala na znaczną redukcję floty kamer (w przypadku Plusa z 6 do 3).
+    
+    \item \textbf{Najlepsze rozwiązanie:} Najbardziej efektywny okazał się wariant \textbf{Kwadrat z $k=2$}, gdzie zaledwie **2 kamery** wystarczyły do pokrycia całego zestawu 6 kontenerów rozproszonych na planszy.
 \end{itemize}
 
 % --- KONIEC ZADANIA 6 ---
