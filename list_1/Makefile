@@ -1,173 +1,160 @@
-# Compiler settings
-CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -Iinclude
-LDFLAGS = 
+## Minimal POSIX Makefile for AOD lab exercises
 
-# Directories
-SRC_DIR = src
-INC_DIR = include
-BUILD_DIR = build
-BIN_DIR = bin
+CXX := g++
+CXXFLAGS := -std=c++17 -Wall -Wextra -Iinclude
+LDFLAGS :=
 
-# Source files
-COMMON_SOURCES = $(SRC_DIR)/dfs.cpp $(SRC_DIR)/bfs.cpp $(SRC_DIR)/toposort.cpp $(SRC_DIR)/scc.cpp $(SRC_DIR)/biparte.cpp
+SRC_DIR := src
+BUILD_DIR := build
+BIN_DIR := bin
 
-# Executables
-EX1_TARGET = $(BIN_DIR)/ex1.exe
-EX2_TARGET = $(BIN_DIR)/ex2.exe
-EX3_TARGET = $(BIN_DIR)/ex3.exe
-EX4_TARGET = $(BIN_DIR)/ex4.exe
+# Map exercises to their object lists
+EX1_OBJS := $(BUILD_DIR)/main_ex1.o $(BUILD_DIR)/dfs.o $(BUILD_DIR)/bfs.o
+EX2_OBJS := $(BUILD_DIR)/main_ex2.o $(BUILD_DIR)/toposort.o
+EX3_OBJS := $(BUILD_DIR)/main_ex3.o $(BUILD_DIR)/scc.o $(BUILD_DIR)/dfs.o $(BUILD_DIR)/toposort.o
+EX4_OBJS := $(BUILD_DIR)/main_ex4.o $(BUILD_DIR)/biparte.o $(BUILD_DIR)/bfs.o
 
-# Object files
-EX1_OBJECTS = $(BUILD_DIR)/main_ex1.o $(BUILD_DIR)/dfs.o $(BUILD_DIR)/bfs.o
-EX2_OBJECTS = $(BUILD_DIR)/main_ex2.o $(BUILD_DIR)/toposort.o
-EX3_OBJECTS = $(BUILD_DIR)/main_ex3.o $(BUILD_DIR)/scc.o $(BUILD_DIR)/dfs.o
-EX4_OBJECTS = $(BUILD_DIR)/main_ex4.o $(BUILD_DIR)/biparte.o $(BUILD_DIR)/bfs.o
+EX1_BIN := $(BIN_DIR)/ex1.exe
+EX2_BIN := $(BIN_DIR)/ex2.exe
+EX3_BIN := $(BIN_DIR)/ex3.exe
+EX4_BIN := $(BIN_DIR)/ex4.exe
 
-# Default target - build all executables
-all: $(EX1_TARGET) $(EX2_TARGET) $(EX3_TARGET) $(EX4_TARGET)
-	@echo All exercises built successfully!
+# Discover all .cpp files under src for generic compilation rule
+SRCS := $(wildcard $(SRC_DIR)/*.cpp)
+OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SRCS))
 
-# Create necessary directories
-$(BUILD_DIR):
-	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
+.PHONY: all ex1 ex2 ex3 ex4 run-ex1 run-ex2 run-ex3 run-ex4 test-ex1-all test-ex2-all test-ex3-all test-ex4-all clean help
 
-$(BIN_DIR):
-	@if not exist "$(BIN_DIR)" mkdir "$(BIN_DIR)"
+all: $(EX1_BIN) $(EX2_BIN) $(EX3_BIN) $(EX4_BIN)
+	@echo "All exercises built"
 
-# Build Exercise 1
-$(EX1_TARGET): $(EX1_OBJECTS) | $(BIN_DIR)
+# Build binaries
+$(EX1_BIN): $(EX1_OBJS) | $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
-	@echo Built exercise 1: $@
+	@echo Built $@
 
-# Build Exercise 2
-$(EX2_TARGET): $(EX2_OBJECTS) | $(BIN_DIR)
+$(EX2_BIN): $(EX2_OBJS) | $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
-	@echo Built exercise 2: $@
+	@echo Built $@
 
-# Build Exercise 3
-$(EX3_TARGET): $(EX3_OBJECTS) | $(BIN_DIR)
+$(EX3_BIN): $(EX3_OBJS) | $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
-	@echo Built exercise 3: $@
+	@echo Built $@
 
-# Build Exercise 4
-$(EX4_TARGET): $(EX4_OBJECTS) | $(BIN_DIR)
+$(EX4_BIN): $(EX4_OBJS) | $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
-	@echo Built exercise 4: $@
+	@echo Built $@
 
-# Compile object files
+# Generic rule to compile .cpp -> .o
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+# Directories
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
+
 # Individual build targets
-ex1: $(EX1_TARGET)
-ex2: $(EX2_TARGET)
-ex3: $(EX3_TARGET)
-ex4: $(EX4_TARGET)
+ex1: $(EX1_BIN)
+ex2: $(EX2_BIN)
+ex3: $(EX3_BIN)
+ex4: $(EX4_BIN)
 
-# Run targets with test cases
-# Exercise 1 - Uses test cases from folder 4
-run-ex1: $(EX1_TARGET)
-	@echo Running Exercise 1...
-	@$(EX1_TARGET)
+# Run targets
+run-ex1: ex1
+	@echo "Running ex1"
+	@$(EX1_BIN)
 
-# Exercise 2 - Uses test cases from folder 2
-run-ex2: $(EX2_TARGET)
-	@echo Running Exercise 2...
-	@$(EX2_TARGET)
+run-ex2: ex2
+	@echo "Running ex2"
+	@$(EX2_BIN)
 
-# Exercise 3 - Uses test cases from folder 3
-run-ex3: $(EX3_TARGET)
-	@echo Running Exercise 3...
-	@$(EX3_TARGET)
+run-ex3: ex3
+	@echo "Running ex3"
+	@$(EX3_BIN)
 
-# Exercise 4 - Uses test cases from folder 4
-run-ex4: $(EX4_TARGET)
-	@echo Running Exercise 4...
-	@$(EX4_TARGET)
+run-ex4: ex4
+	@echo "Running ex4"
+	@$(EX4_BIN)
 
-# Run all exercises with specific test files (examples)
-# Usage: make test-ex1-1 (runs exercise 1 with test case 1)
-test-ex1-1: $(EX1_TARGET)
-	@echo Testing Exercise 1 with u4a-1.txt...
-	@$(EX1_TARGET) < test_cases/4/u4a-1.txt
+# Test-all targets (POSIX shell loops)
+# Each will run the executable with every matching test case in test_cases/<n>/
 
-test-ex1-2: $(EX1_TARGET)
-	@echo Testing Exercise 1 with u4a-2.txt...
-	@$(EX1_TARGET) < test_cases/4/u4a-2.txt
+test-ex1-all: ex1
+	@echo "Running all tests for ex1..."
+	@for f in test_cases/1/*.txt; do \
+		echo "=== $$f ==="; \
+		type=$$(sed -n '1p' "$$f" 2>/dev/null || true); \
+		nv=$$(sed -n '2p' "$$f" 2>/dev/null || true); \
+		ne=$$(sed -n '3p' "$$f" 2>/dev/null || true); \
+		echo "Graph type: $$type  Vertices: $$nv  Edges: $$ne"; \
+		start=$$(date +%s%3N); \
+		$(EX1_BIN) < "$$f"; \
+		end=$$(date +%s%3N); \
+		elapsed=$$((end - start)); \
+		echo "Elapsed: $$elapsed ms"; \
+		echo; \
+	done
 
-test-ex2-1: $(EX2_TARGET)
-	@echo Testing Exercise 2 with g2a-1.txt...
-	@$(EX2_TARGET) < test_cases/2/g2a-1.txt
+test-ex2-all: ex2
+	@echo "Running all tests for ex2..."
+	@for f in test_cases/2/*.txt; do \
+		echo "=== $$f ==="; \
+		type=$$(sed -n '1p' "$$f" 2>/dev/null || true); \
+		nv=$$(sed -n '2p' "$$f" 2>/dev/null || true); \
+		ne=$$(sed -n '3p' "$$f" 2>/dev/null || true); \
+		echo "Graph type: $$type  Vertices: $$nv  Edges: $$ne"; \
+		start=$$(date +%s%3N); \
+		$(EX2_BIN) < "$$f"; \
+		end=$$(date +%s%3N); \
+		elapsed=$$((end - start)); \
+		echo "Elapsed: $$elapsed ms"; \
+		echo; \
+	done
 
-test-ex2-2: $(EX2_TARGET)
-	@echo Testing Exercise 2 with g2a-2.txt...
-	@$(EX2_TARGET) < test_cases/2/g2a-2.txt
+test-ex3-all: ex3
+	@echo "Running all tests for ex3..."
+	@for f in test_cases/3/*.txt; do \
+		echo "=== $$f ==="; \
+		type=$$(sed -n '1p' "$$f" 2>/dev/null || true); \
+		nv=$$(sed -n '2p' "$$f" 2>/dev/null || true); \
+		ne=$$(sed -n '3p' "$$f" 2>/dev/null || true); \
+		echo "Graph type: $$type  Vertices: $$nv  Edges: $$ne"; \
+		start=$$(date +%s%3N); \
+		$(EX3_BIN) < "$$f"; \
+		end=$$(date +%s%3N); \
+		elapsed=$$((end - start)); \
+		echo "Elapsed: $$elapsed ms"; \
+		echo; \
+	done
 
-test-ex3-1: $(EX3_TARGET)
-	@echo Testing Exercise 3 with g3-1.txt...
-	@$(EX3_TARGET) < test_cases/3/g3-1.txt
+test-ex4-all: ex4
+	@echo "Running all tests for ex4..."
+	@for f in test_cases/4/*.txt; do \
+		echo "=== $$f ==="; \
+		type=$$(sed -n '1p' "$$f" 2>/dev/null || true); \
+		nv=$$(sed -n '2p' "$$f" 2>/dev/null || true); \
+		ne=$$(sed -n '3p' "$$f" 2>/dev/null || true); \
+		echo "Graph type: $$type  Vertices: $$nv  Edges: $$ne"; \
+		start=$$(date +%s%3N); \
+		$(EX4_BIN) < "$$f"; \
+		end=$$(date +%s%3N); \
+		elapsed=$$((end - start)); \
+		echo "Elapsed: $$elapsed ms"; \
+		echo; \
+	done
 
-test-ex3-2: $(EX3_TARGET)
-	@echo Testing Exercise 3 with g3-2.txt...
-	@$(EX3_TARGET) < test_cases/3/g3-2.txt
-
-test-ex4-1: $(EX4_TARGET)
-	@echo Testing Exercise 4 with u4a-1.txt...
-	@$(EX4_TARGET) < test_cases/4/u4a-1.txt
-
-test-ex4-2: $(EX4_TARGET)
-	@echo Testing Exercise 4 with u4a-2.txt...
-	@$(EX4_TARGET) < test_cases/4/u4a-2.txt
-
-# Run all tests for an exercise
-test-ex1-all: $(EX1_TARGET)
-	@echo Running all Exercise 1 tests...
-	@for %%f in (test_cases\4\u4a-*.txt) do @(echo Testing %%f && $(EX1_TARGET) < %%f && echo.)
-
-test-ex2-all: $(EX2_TARGET)
-	@echo Running all Exercise 2 tests...
-	@for %%f in (test_cases\2\g2a-*.txt) do @(echo Testing %%f && $(EX2_TARGET) < %%f && echo.)
-
-test-ex3-all: $(EX3_TARGET)
-	@echo Running all Exercise 3 tests...
-	@for %%f in (test_cases\3\g3-*.txt) do @(echo Testing %%f && $(EX3_TARGET) < %%f && echo.)
-
-test-ex4-all: $(EX4_TARGET)
-	@echo Running all Exercise 4 tests...
-	@for %%f in (test_cases\4\u4a-*.txt) do @(echo Testing %%f && $(EX4_TARGET) < %%f && echo.)
-
-# Run all exercises
-run-all: run-ex1 run-ex2 run-ex3 run-ex4
-
-# Clean build artifacts
+# Clean
 clean:
-	@if exist "$(BUILD_DIR)" rmdir /s /q "$(BUILD_DIR)"
-	@if exist "$(BIN_DIR)" rmdir /s /q "$(BIN_DIR)"
-	@echo Cleaned build artifacts
+	rm -rf $(BUILD_DIR) $(BIN_DIR) outputs
+	@echo "Cleaned"
 
-# Rebuild everything
-rebuild: clean all
-
-# Help target
 help:
-	@echo Available targets:
-	@echo   all          - Build all exercises (default)
-	@echo   ex1, ex2, ex3, ex4 - Build individual exercises
-	@echo   run-ex1, run-ex2, run-ex3, run-ex4 - Run individual exercises
-	@echo   run-all      - Run all exercises
-	@echo   test-ex1-1   - Test exercise 1 with specific test case
-	@echo   test-ex2-1   - Test exercise 2 with specific test case
-	@echo   test-ex3-1   - Test exercise 3 with specific test case
-	@echo   test-ex4-1   - Test exercise 4 with specific test case
-	@echo   test-ex1-all - Run all tests for exercise 1
-	@echo   test-ex2-all - Run all tests for exercise 2
-	@echo   test-ex3-all - Run all tests for exercise 3
-	@echo   test-ex4-all - Run all tests for exercise 4
-	@echo   clean        - Remove build artifacts
-	@echo   rebuild      - Clean and rebuild all
-	@echo   help         - Show this help message
-
-.PHONY: all ex1 ex2 ex3 ex4 run-ex1 run-ex2 run-ex3 run-ex4 run-all clean rebuild help \
-        test-ex1-1 test-ex1-2 test-ex2-1 test-ex2-2 test-ex3-1 test-ex3-2 test-ex4-1 test-ex4-2 \
-        test-ex1-all test-ex2-all test-ex3-all test-ex4-all
+	@echo "Available targets:"
+	@echo "  all         - build all exercises"
+	@echo "  ex1..ex4    - build individual exercises"
+	@echo "  run-ex1..4  - run an exercise"
+	@echo "  test-exN-all - run all test cases for exercise N"
+	@echo "  clean       - remove build artifacts"

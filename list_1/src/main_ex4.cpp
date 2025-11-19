@@ -2,7 +2,7 @@
 #include <vector>
 #include "graph.hpp"
 #include "bipartite.hpp"
-#include "algorithm_results.hpp"
+#include "results.hpp"
 
 int main() {
     // 1. Load the graph
@@ -54,9 +54,6 @@ int main() {
     } else {
         std::cout << "Graf NIE jest dwudzielny." << std::endl;
     }
-
-    // 5. Answer the complexity question
-    std::cout << "\nZlozonosc algorytmu: O(|V| + |E|)" << std::endl;
 
     return 0;
 }

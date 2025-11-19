@@ -1,3 +1,6 @@
+#ifndef AOD_RESULTS_HPP
+#define AOD_RESULTS_HPP
+
 #include <list>
 #include <vector>
 
@@ -42,3 +45,5 @@ struct BipartiteResult {
     //  1: partition V1
     std::vector<int> partition;
 };
+
+#endif // AOD_RESULTS_HPP

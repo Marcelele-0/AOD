@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "graph.h"
+#include "graph.hpp"
 #include "dfs.hpp"
 #include "bfs.hpp"
 #include "results.hpp"

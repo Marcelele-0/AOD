@@ -1,7 +1,7 @@
 #include <iostream>
 #include "graph.hpp"
 #include "scc.hpp"
-#include "scc_result.hpp"
+#include "results.hpp"
 
 int main() {
     // 1. Load the graph
@@ -17,17 +17,18 @@ int main() {
     SCC scc_finder(g);
     SCCResult res = scc_finder.run();
 
-    // 4. Print results according to the task specification
-    std::cout << "Number of strongly connected components: " 
-              << res.components.size() << std::endl;
 
-    std::cout << "Number of vertices in components: ";
+    // 4. Print results (clear, machine- and human-readable)
+    std::cout << "SCC count: " << res.components.size() << std::endl;
+
+    // Print sizes of each SCC
+    std::cout << "SCC sizes: ";
     for (const auto& comp : res.components) {
         std::cout << comp.size() << " ";
     }
     std::cout << std::endl;
 
-    // Condition: print component contents only for n <= 200
+    // Condition: print component contents only for n <= 200 (keep existing behaviour)
     if (g.num_vertices <= 200) {
         std::cout << "--- Components ---" << std::endl;
         int component_index = 1;
