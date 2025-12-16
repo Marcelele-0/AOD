@@ -1,0 +1,15 @@
+k,problem,param,res_ek,res_lp,status
+1,Hiperkostka,-,2,2.0,OK
+2,Hiperkostka,-,3,3.0,OK
+3,Hiperkostka,-,12,12.0,OK
+4,Hiperkostka,-,20,20.0,OK
+5,Hiperkostka,-,71,71.0,OK
+3,Skojarzenia,i=1,5,5.0,OK
+3,Skojarzenia,i=2,7,7.0,OK
+3,Skojarzenia,i=3,8,8.0,OK
+4,Skojarzenia,i=1,8,8.0,OK
+4,Skojarzenia,i=2,15,15.0,OK
+4,Skojarzenia,i=4,16,16.0,OK
+5,Skojarzenia,i=1,21,21.0,OK
+5,Skojarzenia,i=2,28,28.0,OK
+5,Skojarzenia,i=5,30,30.0,OK
