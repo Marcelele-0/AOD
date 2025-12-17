@@ -28,7 +28,7 @@ function run_full_suite()
     end
     
     println("\n==================================================")
-    println(" START ZADANIE 1 (Precyzyjny czas)")
+    println(" START ZADANIE 1 ")
     println("==================================================")
     
     for k in 1:16

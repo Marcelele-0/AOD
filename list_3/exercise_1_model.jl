@@ -56,7 +56,7 @@ function edmonds_karp(adj::Vector{Vector{Edge}}, s::Int, t::Int)
     return max_flow, augmenting_paths
 end
 
-# --- NOWOŚĆ: Generowanie pliku dla GLPK ---
+# --- Generowanie pliku dla GLPK ---
 function save_to_glpk(filename::String, adj::Vector{Vector{Edge}}, s::Int, t::Int)
     open(filename, "w") do f
         println(f, "/* Model Programowania Liniowego dla problemu Max Flow */")
