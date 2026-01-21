@@ -27,7 +27,7 @@ function run_z2_experiments()
     data_log = DataFrame(k=Int[], i=Int[], match=Float64[], time=Float64[])
     
     println("==========================================")
-    println(" START ZADANIE 2 (Precyzyjny czas)")
+    println(" START ZADANIE 2 ")
     println("==========================================")
     
     for k in range_k
