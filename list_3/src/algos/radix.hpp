@@ -1,36 +1,49 @@
 #pragma once
+
 #include <vector>
-#include <list>
 #include <cmath>
 #include <algorithm>
+#include <limits>
 #include "../graph.hpp"
 #include "../utils.hpp"
 
-// Funkcja pomocnicza: Oblicza pozycję MSB (Most Significant Bit) różnicy
-// Używamy wbudowanej funkcji GCC __builtin_clzll dla szybkości
+/**
+ * Funkcja pomocnicza obliczająca indeks kubełka.
+ * Bazuje na pozycji najbardziej znaczącego bitu (MSB) różnicy
+ * między aktualnym dystansem a ostatnio wyjętym dystansem.
+ *
+ * Używa wbudowanej instrukcji procesora __builtin_clzll (Count Leading Zeros)
+ * dostępnej w kompilatorach GCC/Clang dla maksymalnej wydajności.
+ */
 inline int get_bucket_index(long long dist, long long last_dist) {
     long long diff = dist ^ last_dist;
     if (diff == 0) return 0;
-    // __builtin_clzll zwraca liczbę zer wiodących. 
-    // 63 - clz to indeks najwyższego ustawionego bitu (dla long long)
-    // Dodajemy 1, bo kubełek 0 jest dla równych wartości.
+    // 64 - liczba zer wiodących daje pozycję MSB + 1.
+    // Dla typu long long (64 bit) kubełków będzie maksymalnie 65.
     return 64 - __builtin_clzll(diff); 
 }
 
+/**
+ * Implementacja algorytmu Radix Heap.
+ * * Złożoność: O(m + n log C), gdzie C to maksymalna waga krawędzi.
+ * Algorytm zoptymalizowany dla wag całkowitoliczbowych.
+ */
 std::vector<long long> run_radix(const Graph& g, int s) {
+    // Inicjalizacja odległości nieskończonością
     std::vector<long long> dist(g.n, INF);
     dist[s] = 0;
 
-    // Kubełki. Dla 64-bitowych intów max 65 kubełków wystarczy
-    // Bucket[0] trzyma wierzchołki o d == last_dist
+    // Struktura kubełkowa.
+    // buckets[i] przechowuje wierzchołki u, dla których zakres odległości
+    // pasuje do i-tego bitu różnicy względem last_dist.
+    // Rozmiar 65 jest wystarczający dla 64-bitowych liczb (long long).
     std::vector<std::vector<int>> buckets(65);
     
-    // Inicjalizacja: wrzucamy źródło do odpowiedniego kubełka
-    // Na początku last_dist = 0
+    // Wstawienie źródła do kubełka 0 (diff = 0)
     buckets[get_bucket_index(0, 0)].push_back(s);
 
-    long long last_dist = 0;
-    int elements_in_heap = 1;
+    long long last_dist = 0; // Ostatnia wyjęta minimalna odległość (rosnąca monotonicznie)
+    int elements_in_heap = 1; // Licznik elementów w strukturze
 
     while (elements_in_heap > 0) {
         // 1. Znajdź pierwszy niepusty kubełek
@@ -39,49 +52,78 @@ std::vector<long long> run_radix(const Graph& g, int s) {
             i++;
         }
         
-        if (i == 65) break; // Pusty heap
+        // Zabezpieczenie na wypadek pustego stogu (teoretycznie obsłużone przez while)
+        if (i == 65) break;
 
-        // 2. Jeśli najmniejszy kubełek to nie 0 (czyli bucket[0] jest pusty),
-        // musimy przenieść elementy z buckets[i] do niższych kubełków (Redistribution)
+        // 2. Redystrybucja (jeśli najmniejszy element nie jest w buckets[0])
+        // Elementy z buckets[i] są przenoszone do niższych kubełków
+        // w oparciu o nowe, zaktualizowane last_dist.
         if (i > 0) {
+            // Przenosimy zawartość kubełka do zmiennej lokalnej (std::swap).
+            // Dzięki temu buckets[i] staje się puste, co zapobiega unieważnieniu
+            // iteratorów podczas ponownego wstawiania elementów (fix na Segmentation Fault).
+            std::vector<int> current_bucket;
+            std::swap(current_bucket, buckets[i]);
+            
             long long min_val = INF;
-            // Szukamy nowego minimum w tym kubełku
-            for (int u : buckets[i]) {
+
+            // Szukamy nowego minimum w obecnym kubełku
+            // Ignorujemy "duchy" (wierzchołki ze starą etykietą, które zostały już poprawione)
+            for (int u : current_bucket) {
+                if (dist[u] < last_dist) continue; // Pomiń nieaktualne wpisy
                 if (dist[u] < min_val) min_val = dist[u];
             }
-            
-            last_dist = min_val; // Aktualizujemy monotonicznie rosnący last_dist
-            
-            // Przenosimy elementy
-            for (int u : buckets[i]) {
-                int new_idx = get_bucket_index(dist[u], last_dist);
-                buckets[new_idx].push_back(u);
+
+            // Jeśli znaleziono poprawne minimum (kubełek nie składał się z samych duchów)
+            if (min_val != INF) {
+                last_dist = min_val; // Aktualizacja monotoniczna
+                
+                // Rozrzucamy elementy do nowych (niższych) kubełków
+                for (int u : current_bucket) {
+                    // Ponowna filtracja duchów przy wstawianiu
+                    if (dist[u] < last_dist) {
+                        elements_in_heap--; // Usuwamy ducha z licznika
+                        continue; 
+                    }
+                    
+                    int new_idx = get_bucket_index(dist[u], last_dist);
+                    buckets[new_idx].push_back(u);
+                }
+            } else {
+                // Jeśli w kubełku były same duchy, po prostu zmniejszamy licznik
+                elements_in_heap -= current_bucket.size();
             }
-            buckets[i].clear();
             
-            // Po redystrybucji na pewno coś trafiło do bucket[0] (element z min_val)
+            // Po redystrybucji minimum na pewno trafiło do buckets[0],
+            // więc restartujemy pętlę szukania od zera.
             i = 0; 
         }
 
-        // 3. Wyjmij element z bucket[0] (mający najmniejszy klucz = last_dist)
+        // 3. Pobranie elementu z buckets[0]
+        // Upewniamy się, że kubełek nie jest pusty (mogło się tak zdarzyć, jeśli przy redystrybucji były same duchy)
+        if (buckets[0].empty()) continue;
+
         int u = buckets[0].back();
         buckets[0].pop_back();
         elements_in_heap--;
 
-        // Jeśli wyjęliśmy coś, co już ma lepszą drogę (lazy deletion), skip
-        // W Radix Heap to rzadkie przy poprawnej redystrybucji, ale możliwe
+        // Ostateczna weryfikacja leniwego usuwania (lazy deletion check)
         if (dist[u] < last_dist) continue;
 
-        // 4. Relaksacja
+        // 4. Relaksacja krawędzi wychodzących
         for (const auto& edge : g.adj[u]) {
             long long new_dist = dist[u] + edge.weight;
+            
             if (new_dist < dist[edge.to]) {
                 dist[edge.to] = new_dist;
+                
+                // Wstawiamy do odpowiedniego kubełka względem bieżącego last_dist
                 int idx = get_bucket_index(new_dist, last_dist);
                 buckets[idx].push_back(edge.to);
                 elements_in_heap++;
             }
         }
     }
+
     return dist;
 }
