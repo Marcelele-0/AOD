@@ -11,9 +11,9 @@
 
 \geometry{margin=2.5cm}
 
-\title{\textbf{Sprawozdanie: Porównanie implementacji algorytmu Dijkstry}}
-\author{Imię Nazwisko (Nr Indeksu: XXXXXX)}
-\date{\today}
+\title{Sprawozdanie: Porównanie implementacji algorytmu Dijkstry}
+\author{Marcel Musiałek (Nr Indeksu: 279704)}
+\date{27 stycznia 2026}
 
 \begin{document}
 
@@ -52,9 +52,6 @@ Testy przeprowadzono na komputerze z systemem Linux (CachyOS). Dla każdego test
 
 \subsection{Wykresy czasu działania}
 
-% Tu wstawiamy wykresy wygenerowane przez skrypt Python
-% Upewnij się, że pliki PNG są w folderze wykresy/
-
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{wykresy/Random4-n.png}
@@ -79,7 +76,6 @@ Testy przeprowadzono na komputerze z systemem Linux (CachyOS). Dla każdego test
     \caption{Porównanie algorytmów dla mapy drogowej USA (NY).}
 \end{figure}
 
-% Wykresy dla zmiennych kosztów C
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{wykresy/Square-C.png}
@@ -104,25 +100,28 @@ Poniższa tabela przedstawia długości najkrótszych ścieżek dla wybranych pa
 \end{table}
 
 \section{Interpretacja wyników i wnioski}
-
 Analiza przeprowadzonych eksperymentów pozwala na sformułowanie następujących wniosków:
 
 \begin{enumerate}
-    \item \textbf{Stabilność algorytmu Dijkstry:} Standardowa implementacja z kopcem binarnym ($O(m \log n)$) okazała się najbardziej uniwersalna. Działała stabilnie dla wszystkich rodzin grafów, niezależnie od struktury czy wielkości wag. Jest to najbezpieczniejszy wybór do ogólnych zastosowań.
-    
-    \item \textbf{Wydajność algorytmu Diala:}
+    \item \textbf{Stabilność algorytmu Dijkstry:} 
+    Standardowa implementacja z kopcem binarnym ($O(m \log n)$) okazała się najbardziej uniwersalna. Działała stabilnie dla wszystkich rodzin grafów, niezależnie od struktury czy wielkości wag. Jest to najbezpieczniejszy wybór do ogólnych zastosowań, co widać na wykresach – linia Dijkstry nigdy nie "wystrzeliła" w górę tak gwałtownie jak konkurencja.
+
+    \item \textbf{Niejednorodna wydajność algorytmu Diala:}
     \begin{itemize}
-        \item Dla grafów z małymi wagami (rodziny \texttt{-n}), Dial był bezkonkurencyjny, osiągając czasy rzędu milisekund tam, gdzie Dijkstra potrzebował ich setki.
-        \item Dla grafów z dużymi wagami (rodziny \texttt{-C}), algorytm stał się niepraktyczny. Czas wykonania rósł liniowo wraz z $C$. Dla instancji \texttt{Long-C} został on pominięty w testach, ponieważ czas alokacji i przeglądania pustych kubełków przekraczał rozsądne granice (zjawisko \textit{pseudo-polynomial time}).
+        \item Algorytm "zabłysnął" na rzeczywistej mapie drogowej (USA-road-d), gdzie wyprzedził Dijkstrę (14.15 ms vs 17.47 ms).
+        \item Jednak w testach syntetycznych (rodziny Square-n i Long-n), mimo małych wag, algorytm okazał się najwolniejszy. Widać, że algorytm tracił czas na iterowanie po pustych kubełkach, co przy takiej strukturze grafu niweluje jego teoretyczną przewagę. Zysk z braku kopca został "zjedzony" przez konieczność sprawdzania pustych indeksów w tablicy.
+        \item Dla dużych wag (rodziny -C) algorytm zgodnie z teorią stał się nieużywalny.
     \end{itemize}
 
     \item \textbf{Specyfika Radix Heap:}
     \begin{itemize}
-        \item Algorytm ten stanowił doskonały kompromis między Dijkstrą a Dialem. Dla grafów \texttt{Random} i \texttt{Square} był zazwyczaj szybszy od Dijkstry dzięki mniejszemu narzutowi na operacje kolejki.
-        \item W przypadku grafów o bardzo dużej średnicy i wagach (rodzina \texttt{Long-n} i \texttt{Long-C}), zaobserwowano problemy z zakresami zmiennych. Ze względu na kumulację wag na długich ścieżkach, implementacja natrafiała na problemy z adresowaniem kubełków (Błąd Segmentacji), co potwierdza teoretyczne ograniczenia tej struktury w kontekście arytmetyki skończonej.
+        \item Ten algorytm dobrze radził sobie w testach syntetycznych (Square-n), często dorównując lub nieznacznie wyprzedzając Dijkstrę.
+        \item Co ciekawe, na mapie USA (Rysunek 4) Radix Heap wypadł najgorzej (18.90 ms). Sugeruje to, że narzut na zarządzanie bardziej skomplikowaną strukturą danych (operacje bitowe, przenoszenie kubełków) nie zawsze zwraca się w praktyce, jeśli graf nie jest specyficznie dopasowany pod ten algorytm.
+        \item Podobnie jak w przypadku Diala, przy bardzo dużych odległościach (Long-n) pojawiły się problemy z przekroczeniem zakresów zmiennych (overflow).
     \end{itemize}
 
-    \item \textbf{Wpływ topologii:} Struktura grafu ma kluczowe znaczenie. Na grafach "kwadratowych" (siatki) i mapach drogowych (planarnych) algorytmy kubełkowe zyskują najwięcej. Na grafach będących długimi ścieżkami (\texttt{Long}), ich przewaga zanika lub zmienia się w wadę ze względu na konieczność obsługi szerokiego zakresu odległości.
+    \item \textbf{Wpływ topologii:} 
+    Struktura grafu ma kluczowe znaczenie. Algorytmy kubełkowe (Dial) zyskały przewagę jedynie na gęstej siatce mapy drogowej. Na rzadszych grafach syntetycznych ich wydajność spadała, przez co standardowy Dijkstra okazał się "złotym środkiem" – może nie zawsze najszybszym, ale najbardziej przewidywalnym.
 \end{enumerate}
 
 \end{document}
